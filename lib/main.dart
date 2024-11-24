@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'pages/dealership_list_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -67,7 +68,7 @@ class MyHomePage extends StatelessWidget {
                     context,
                     'Dealership List',
                     Icons.store,
-                    const CarDealershipListPage(),
+                    const DealershipListPage(),
                   ),
                   _buildMenuButton(
                     context,
@@ -142,18 +143,6 @@ class CarListPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Car List')),
       body: const Center(child: Text('Car List Page')),
-    );
-  }
-}
-
-class CarDealershipListPage extends StatelessWidget {
-  const CarDealershipListPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Dealership List')),
-      body: const Center(child: Text('Dealership List Page')),
     );
   }
 }
