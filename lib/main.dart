@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:finalproject/car_list_page.dart';
 
 // Main entry point of the application
 void main() {
@@ -62,15 +63,15 @@ class MyHomePage extends StatelessWidget {
               },
               child: const Text('Customer List'),
             ),
-            // Button to navigate to Car List page
+            // Button to navigate to Car List Page
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const CarListPage()),
+                  MaterialPageRoute(builder: (context) => CarListPage()), // Navigate to CarListPage
                 );
               },
-              child: const Text('Car List'),
+              child: const Text('Car List Page'),
             ),
             // Button to navigate to Car Dealership List page
             ElevatedButton(
@@ -118,24 +119,6 @@ class CustomerListPage extends StatelessWidget {
   }
 }
 
-// Placeholder page for Car List
-class CarListPage extends StatelessWidget {
-  const CarListPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      // App bar for the Car List page
-      appBar: AppBar(
-        title: const Text('Car List'),
-      ),
-      // Placeholder center text
-      body: const Center(
-        child: Text('Car List Page'),
-      ),
-    );
-  }
-}
 
 // Placeholder page for Car Dealership List
 class CarDealershipListPage extends StatelessWidget {
