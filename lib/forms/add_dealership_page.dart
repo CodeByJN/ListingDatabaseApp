@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-/// A page for adding or editing dealership details.
+/// AddDealershipPage allows users to add or edit dealership information.
+/// If a dealership is provided, the fields are pre-filled for editing.
+/// Otherwise, users can start with a blank form or copy the last dealership's data.
 class AddDealershipPage extends StatefulWidget {
-  final Map<String, String>? dealership; // Dealership data (used for editing)
+  final Map<String, String>? dealership; // Dealership data passed for editing
 
-  /// Constructor accepts an optional [dealership] map for editing.
   const AddDealershipPage({super.key, this.dealership});
 
   @override
@@ -12,88 +14,148 @@ class AddDealershipPage extends StatefulWidget {
 }
 
 class _AddDealershipPageState extends State<AddDealershipPage> {
-  final _formKey = GlobalKey<FormState>(); // Key to manage the form state
-  final _nameController = TextEditingController(); // Controller for the Name field
-  final _addressController = TextEditingController(); // Controller for the Address field
-  final _cityController = TextEditingController(); // Controller for the City field
-  final _zipCodeController = TextEditingController(); // Controller for the Zip Code field
+  // Key for form validation
+  final _formKey = GlobalKey<FormState>();
+
+  // Text controllers for form fields
+  final _nameController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _cityController = TextEditingController();
+  final _zipCodeController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // If dealership data is provided (editing mode), pre-fill the form fields
+
+    // If editing an existing dealership, pre-fill the form fields
     if (widget.dealership != null) {
       _nameController.text = widget.dealership!['name']!;
       _addressController.text = widget.dealership!['address']!;
       _cityController.text = widget.dealership!['city']!;
       _zipCodeController.text = widget.dealership!['zipCode']!;
+    } else {
+      // If adding a new dealership, load the last saved dealership data
+      _loadPreviousDealership();
     }
+  }
+
+  /// Load the last saved dealership data from SharedPreferences.
+  Future<void> _loadPreviousDealership() async {
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('previous_name');
+    final address = prefs.getString('previous_address');
+    final city = prefs.getString('previous_city');
+    final zipCode = prefs.getString('previous_zipCode');
+
+    // If all fields exist, ask the user if they want to copy the previous data
+    if (name != null && address != null && city != null && zipCode != null) {
+      final copyPrevious = await showDialog<bool>(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Copy Previous Dealership?'),
+            content: const Text(
+                'Do you want to copy the information from the last dealership you added?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('No'), // Start with blank fields
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Yes'), // Copy the previous dealership data
+              ),
+            ],
+          );
+        },
+      );
+
+      // If the user chooses to copy, pre-fill the fields with the saved data
+      if (copyPrevious == true) {
+        setState(() {
+          _nameController.text = name;
+          _addressController.text = address;
+          _cityController.text = city;
+          _zipCodeController.text = zipCode;
+        });
+      }
+    }
+  }
+
+  /// Save the current dealership data to SharedPreferences for future use.
+  Future<void> _saveToPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('previous_name', _nameController.text);
+    await prefs.setString('previous_address', _addressController.text);
+    await prefs.setString('previous_city', _cityController.text);
+    await prefs.setString('previous_zipCode', _zipCodeController.text);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Title changes based on whether we're adding or editing
+        // Show "Add Dealership" or "Edit Dealership" based on the context
         title: Text(widget.dealership == null ? 'Add Dealership' : 'Edit Dealership'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
-          key: _formKey, // Link the form to the [_formKey]
+          key: _formKey,
           child: Column(
             children: [
-              // Name TextFormField
+              // Input field for dealership name
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: 'Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a name.'; // Validation message for empty fields
+                    return 'Please enter a name.'; // Validation error
                   }
-                  return null;
+                  return null; // Validation success
                 },
               ),
-              // Address TextFormField
+              // Input field for dealership address
               TextFormField(
                 controller: _addressController,
-                decoration: const InputDecoration(labelText: 'Street Address'),
+                decoration: const InputDecoration(labelText: 'Address'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a street address.';
+                    return 'Please enter an address.'; // Validation error
                   }
-                  return null;
+                  return null; // Validation success
                 },
               ),
-              // City TextFormField
+              // Input field for dealership city
               TextFormField(
                 controller: _cityController,
                 decoration: const InputDecoration(labelText: 'City'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a city.';
+                    return 'Please enter a city.'; // Validation error
                   }
-                  return null;
+                  return null; // Validation success
                 },
               ),
-              // Zip Code TextFormField
+              // Input field for dealership zip code
               TextFormField(
                 controller: _zipCodeController,
                 decoration: const InputDecoration(labelText: 'Zip Code'),
-                keyboardType: TextInputType.number, // Ensure numeric keyboard for this field
+                keyboardType: TextInputType.number, // Numeric input
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a zip code.';
+                    return 'Please enter a zip code.'; // Validation error
                   }
-                  return null;
+                  return null; // Validation success
                 },
               ),
-              const SizedBox(height: 20), // Add spacing before the button
-              // Save Button
+              const SizedBox(height: 20), // Space before the button
+              // Button to save or update the dealership
               ElevatedButton(
                 onPressed: _saveDealership,
-                // Button text changes based on whether we're adding or editing
-                child: Text(widget.dealership == null ? 'Add Dealership' : 'Update Dealership'),
+                child: Text(widget.dealership == null
+                    ? 'Add Dealership' // Button label for adding
+                    : 'Update Dealership'), // Button label for editing
               ),
             ],
           ),
@@ -102,30 +164,28 @@ class _AddDealershipPageState extends State<AddDealershipPage> {
     );
   }
 
-  /// Called when the Save button is pressed.
-  ///
-  /// Validates the form, creates a dealership map, and returns it to the previous page.
-  void _saveDealership() {
+  /// Save the dealership data and return it to the previous screen.
+  void _saveDealership() async {
     if (_formKey.currentState!.validate()) {
-      // Collect form data into a map
+      // Collect dealership data into a map
       final dealership = {
-        'name': _nameController.text, // Name field value
-        'address': _addressController.text, // Address field value
-        'city': _cityController.text, // City field value
-        'zipCode': _zipCodeController.text, // Zip Code field value
+        'name': _nameController.text,
+        'address': _addressController.text,
+        'city': _cityController.text,
+        'zipCode': _zipCodeController.text,
       };
 
-      // Debug print for development purposes
-      debugPrint('Saving dealership: $dealership');
+      // Save the data to SharedPreferences for future use
+      await _saveToPreferences();
 
-      // Navigate back and return the dealership data
+      // Return the dealership data to the previous screen
       Navigator.pop(context, dealership);
     }
   }
 
   @override
   void dispose() {
-    // Dispose controllers to free resources and avoid memory leaks
+    // Dispose of the text controllers to free resources
     _nameController.dispose();
     _addressController.dispose();
     _cityController.dispose();
