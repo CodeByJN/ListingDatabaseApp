@@ -1,176 +1,171 @@
 import 'package:flutter/material.dart';
 
-// Main entry point of the application
 void main() {
-  // Runs the MyApp widget
   runApp(const MyApp());
 }
 
-// Root widget of the application
 class MyApp extends StatelessWidget {
-  // Constructor with an optional key
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Sets up the MaterialApp with a theme and home page
     return MaterialApp(
-      // App title (used in device settings)
-      title: 'Flutter Navigation',
-      // Creates a color scheme based on deep purple
+      title: 'Automotive Car Sale',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        // Enables Material 3 design
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
         useMaterial3: true,
       ),
-      // Sets the initial home page
-      home: const MyHomePage(title: 'Navigation Home Page'),
+      home: const MyHomePage(title: 'Automotive Car Sale'),
     );
   }
 }
 
-// Home page of the application with navigation buttons
 class MyHomePage extends StatelessWidget {
-  // Constructor requiring a title
   const MyHomePage({super.key, required this.title});
 
-  // Title of the home page
   final String title;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // App bar with dynamic background color
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(title),
-      ),
-      // Centered column of navigation buttons
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
-          // Centers buttons vertically
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            // Button to navigate to Customer List page
-            ElevatedButton(
-              onPressed: () {
-                // Uses Navigator to push a new route/page
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const CustomerListPage()),
-                );
-              },
-              child: const Text('Customer List'),
+          children: [
+            // Banner section
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Image.asset(
+                'images/banner.png',
+                fit: BoxFit.cover,
+              ),
             ),
-            // Button to navigate to Car List page
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const CarListPage()),
-                );
-              },
-              child: const Text('Car List'),
-            ),
-            // Button to navigate to Car Dealership List page
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const CarDealershipListPage()),
-                );
-              },
-              child: const Text('Car-Dealership List'),
-            ),
-            // Button to navigate to Sales List page
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SalesListPage()),
-                );
-              },
-              child: const Text('Sales List'),
+            const SizedBox(height: 20),
+            // Buttons grid
+            Container(
+              color: Colors.blueGrey.shade50,
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                children: [
+                  _buildMenuButton(
+                    context,
+                    'Customer List',
+                    Icons.people,
+                    const CustomerListPage(),
+                  ),
+                  _buildMenuButton(
+                    context,
+                    'Car List',
+                    Icons.directions_car,
+                    const CarListPage(),
+                  ),
+                  _buildMenuButton(
+                    context,
+                    'Dealership List',
+                    Icons.store,
+                    const CarDealershipListPage(),
+                  ),
+                  _buildMenuButton(
+                    context,
+                    'Sales List',
+                    Icons.attach_money,
+                    const SalesListPage(),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildMenuButton(
+      BuildContext context, String title, IconData icon, Widget page) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => page),
+        );
+      },
+      child: Card(
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 40, color: Colors.blueGrey),
+              const SizedBox(height: 10),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-// Placeholder page for Customer List
+// Placeholder pages
 class CustomerListPage extends StatelessWidget {
   const CustomerListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // App bar for the Customer List page
-      appBar: AppBar(
-        title: const Text('Customer List'),
-      ),
-      // Placeholder center text
-      body: const Center(
-        child: Text('Customer List Page'),
-      ),
+      appBar: AppBar(title: const Text('Customer List')),
+      body: const Center(child: Text('Customer List Page')),
     );
   }
 }
 
-// Placeholder page for Car List
 class CarListPage extends StatelessWidget {
   const CarListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // App bar for the Car List page
-      appBar: AppBar(
-        title: const Text('Car List'),
-      ),
-      // Placeholder center text
-      body: const Center(
-        child: Text('Car List Page'),
-      ),
+      appBar: AppBar(title: const Text('Car List')),
+      body: const Center(child: Text('Car List Page')),
     );
   }
 }
 
-// Placeholder page for Car Dealership List
 class CarDealershipListPage extends StatelessWidget {
   const CarDealershipListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // App bar for the Car Dealership List page
-      appBar: AppBar(
-        title: const Text('Car-Dealership List'),
-      ),
-      // Placeholder center text
-      body: const Center(
-        child: Text('Car-Dealership List Page'),
-      ),
+      appBar: AppBar(title: const Text('Dealership List')),
+      body: const Center(child: Text('Dealership List Page')),
     );
   }
 }
 
-// Placeholder page for Sales List
 class SalesListPage extends StatelessWidget {
   const SalesListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // App bar for the Sales List page
-      appBar: AppBar(
-        title: const Text('Sales List'),
-      ),
-      // Placeholder center text
-      body: const Center(
-        child: Text('Sales List Page'),
-      ),
+      appBar: AppBar(title: const Text('Sales List')),
+      body: const Center(child: Text('Sales List Page')),
     );
   }
 }
