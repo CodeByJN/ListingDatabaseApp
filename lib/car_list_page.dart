@@ -3,6 +3,7 @@ import 'app_database.dart';
 import 'car.dart';
 import 'car_dao.dart';
 import 'encryption_helper.dart';
+import 'database_factory.dart';
 
 class CarListPage extends StatefulWidget {
   const CarListPage({Key? key}) : super(key: key);
@@ -13,48 +14,70 @@ class CarListPage extends StatefulWidget {
 
 class _CarListPageState extends State<CarListPage> {
   List<Car> _cars = [];
-  late CarDao _carDao;
+  CarDao? _carDao;  // Make sure _carDao can be null initially
   late AppDatabase _database;
+  bool _isLoading = true;
+  bool _isDatabaseInitialized = false;
 
   @override
   void initState() {
     super.initState();
     _initDatabase();
-    _loadEncryptedData();
   }
 
   Future<void> _initDatabase() async {
-    _database = await $FloorAppDatabase.databaseBuilder('app_database.db').build();
-    _carDao = _database.carDao;
-    _loadCars();
+    try {
+      _database = await getDatabase();  // Initialize the database
+      _carDao = _database.carDao;  // Initialize the DAO
+      _isDatabaseInitialized = true;
+      await _loadCars();
+    } catch (e) {
+      print('Error initializing database: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _loadCars() async {
-    final cars = await _carDao.findAllCars();
-    setState(() {
-      _cars = cars;
-    });
+    if (!_isDatabaseInitialized || _carDao == null) return;
+
+    try {
+      final cars = await _carDao!.findAllCars(); // Make sure _carDao is not null
+      setState(() {
+        _cars = cars;
+      });
+    } catch (e) {
+      print('Error loading cars: $e');
+    }
   }
 
   Future<void> _loadEncryptedData() async {
-    final encryptedBrand = await EncryptionHelper.getEncryptedString('last_brand');
-    final encryptedModel = await EncryptionHelper.getEncryptedString('last_model');
-    final encryptedPassengers = await EncryptionHelper.getEncryptedString('last_passengers');
-    final encryptedSize = await EncryptionHelper.getEncryptedString('last_size');
+    try {
+      final encryptedBrand = await EncryptionHelper.getEncryptedString('last_brand');
+      final encryptedModel = await EncryptionHelper.getEncryptedString('last_model');
+      final encryptedPassengers = await EncryptionHelper.getEncryptedString('last_passengers');
+      final encryptedSize = await EncryptionHelper.getEncryptedString('last_size');
 
-    if (encryptedBrand != null && encryptedModel != null && encryptedPassengers != null && encryptedSize != null) {
-      // Use decrypted data as needed
+      if (encryptedBrand != null && encryptedModel != null && encryptedPassengers != null && encryptedSize != null) {
+        // Use decrypted data as needed
+      }
+    } catch (e) {
+      print('Error loading encrypted data: $e');
     }
   }
 
   void _showAddCarDialog() {
     showDialog(
       context: context,
-      builder: (context) => _CarDialog(onSubmit: (car) {
+      builder: (context) => _CarDialog(onSubmit: (car) async {
         setState(() {
           _cars.add(car);
         });
-        _carDao.insertCar(car);
+        if (_carDao != null) {
+          await _carDao!.insertCar(car); // Check that _carDao is not null before use
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Car "${car.brand} ${car.model}" added successfully!')),
         );
@@ -67,12 +90,14 @@ class _CarListPageState extends State<CarListPage> {
       context: context,
       builder: (context) => _CarDialog(
         car: car,
-        onSubmit: (updatedCar) {
+        onSubmit: (updatedCar) async {
           setState(() {
             final index = _cars.indexWhere((c) => c.id == car.id);
             _cars[index] = updatedCar;
           });
-          _carDao.updateCar(updatedCar);
+          if (_carDao != null) {
+            await _carDao!.updateCar(updatedCar); // Check that _carDao is not null before use
+          }
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Car "${car.brand} ${car.model}" updated successfully!')),
           );
@@ -85,7 +110,9 @@ class _CarListPageState extends State<CarListPage> {
     setState(() {
       _cars.remove(car);
     });
-    _carDao.deleteCar(car);
+    if (_carDao != null) {
+      _carDao!.deleteCar(car); // Check that _carDao is not null before use
+    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Car "${car.brand} ${car.model}" deleted successfully!')),
     );
@@ -103,7 +130,9 @@ class _CarListPageState extends State<CarListPage> {
           ),
         ],
       ),
-      body: _cars.isEmpty
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _cars.isEmpty
           ? const Center(
         child: Text(
           'No cars available. Tap the "+" button to add a new car.',
@@ -147,7 +176,7 @@ class _CarListPageState extends State<CarListPage> {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Instructions'),
-        content: const Text('Here is how to use the Car List Page...'),
+        content: const Text('Press on the "Add Car" button to start adding car.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -231,15 +260,14 @@ class _CarDialog extends StatelessWidget {
         ElevatedButton(
           onPressed: () {
             if (_validateInputs(context)) {
-              final newCar = Car(
-                id: car?.id,
+              final car = Car(
+                id: this.car?.id,
                 brand: _brandController.text.trim(),
                 model: _modelController.text.trim(),
-                passengers: int.parse(_passengersController.text),
-                size: double.parse(_sizeController.text),
+                passengers: int.parse(_passengersController.text.trim()),
+                size: double.parse(_sizeController.text.trim()),
               );
-              onSubmit(newCar);
-              _saveEncryptedData(newCar);
+              onSubmit(car);
               Navigator.pop(context);
             }
           },
@@ -248,7 +276,7 @@ class _CarDialog extends StatelessWidget {
       ],
     );
   }
-  /// Validates input fields and shows a `SnackBar` for invalid entries.
+
   bool _validateInputs(BuildContext context) {
     if (_brandController.text.trim().isEmpty ||
         _modelController.text.trim().isEmpty ||
@@ -262,25 +290,6 @@ class _CarDialog extends StatelessWidget {
       );
       return false;
     }
-    try {
-      int.parse(_passengersController.text.trim());
-      double.parse(_sizeController.text.trim());
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter valid numeric values for Passengers and Size.'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      return false;
-    }
     return true;
-  }
-
-  Future<void> _saveEncryptedData(Car car) async {
-    await EncryptionHelper.setEncryptedString('last_brand', car.brand);
-    await EncryptionHelper.setEncryptedString('last_model', car.model);
-    await EncryptionHelper.setEncryptedString('last_passengers', car.passengers.toString());
-    await EncryptionHelper.setEncryptedString('last_size', car.size.toString());
   }
 }
