@@ -30,20 +30,28 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  sqflite: ^2.2.5
-  sqflite_common_ffi: ^2.2.5
-  path: ^1.8.3
-  shared_preferences: ^2.0.18
+  flutter_localizations:
+    sdk: flutter
+  floor: ^1.0.0                # Your ORM database library
+  floor_generator: ^1.0.0     # Floor's code generator
+  sqflite: ^2.2.5             # Teammate's SQLite library
+  sqflite_common_ffi: ^2.2.5  # For FFI SQLite compatibility
+  platform_detect: ^2.0.0
+  path_provider: ^2.0.11      # To get paths for files
+  path: ^1.8.3                # File path utilities
+  intl: ^0.19.0               # Localization utilities
+  shared_preferences: ^2.0.18 # To save small preferences locally
 
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  encrypted_shared_preferences: ^3.0.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+  build_runner: ^2.1.2
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your

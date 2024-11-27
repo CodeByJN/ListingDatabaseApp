@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:finalproject/car_list_page.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import '../pages/dealership_list_page.dart';
 
 void main() {
   // Initialize the FFI (Foreign Function Interface) database for compatibility with desktop platforms.
@@ -87,7 +87,7 @@ class MyHomePage extends StatelessWidget {
                     context,
                     'Dealership List',
                     Icons.store,
-                    const DealershipListPage(),
+                    const CarDealershipListPage(),
                   ),
                   // Button for navigating to the Sales List page
                   _buildMenuButton(
@@ -157,15 +157,15 @@ class CustomerListPage extends StatelessWidget {
   }
 }
 
-// Placeholder for the Car List page
-class CarListPage extends StatelessWidget {
-  const CarListPage({super.key});
+// Placeholder for the Dealership List page
+class CarDealershipListPage extends StatelessWidget {
+  const CarDealershipListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Car List')), // App bar title
-      body: const Center(child: Text('Car List Page')), // Placeholder content
+      appBar: AppBar(title: const Text('Car Dealership List')), // App bar title
+      body: const Center(child: Text('Car Dealership List Page')), // Placeholder content
     );
   }
 }
