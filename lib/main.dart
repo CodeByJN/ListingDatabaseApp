@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'pages/dealership_list_page.dart';
+import 'pages/CustomerListPage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,6 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Automotive Car Sale',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
@@ -123,17 +125,7 @@ class MyHomePage extends StatelessWidget {
 }
 
 // Placeholder pages
-class CustomerListPage extends StatelessWidget {
-  const CustomerListPage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Customer List')),
-      body: const Center(child: Text('Customer List Page')),
-    );
-  }
-}
 
 class CarListPage extends StatelessWidget {
   const CarListPage({super.key});

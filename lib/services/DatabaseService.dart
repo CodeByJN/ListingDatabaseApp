@@ -32,6 +32,7 @@ class DatabaseService {
   // Method to create database tables
   Future<void> _createTables(Database db) async {
     // Table for car dealerships
+
     await db.execute('''
       CREATE TABLE dealerships (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,8 +42,19 @@ class DatabaseService {
         zipCode TEXT NOT NULL
       )
     ''');
-
+    print('Dealership table created');
     // Additional tables for customers, cars, or sales can be added here if required
+
+    await db.execute('''
+      CREATE TABLE customers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        firstName TEXT NOT NULL,
+        lastName TEXT NOT NULL,
+        address TEXT NOT NULL,
+        birthday TEXT NOT NULL
+      )
+    ''');
+    print('Customers table created');
   }
 
   // *** CRUD Operations for Dealerships ***
@@ -94,5 +106,43 @@ class DatabaseService {
     final db = await database;
     await db.delete('dealerships');
     // Add additional clear operations for other tables if required
+  }
+
+  Future<void> insertCustomer(Map<String, String> customer) async {
+    final db = await database;
+    await db.insert('customers', customer);
+  }
+
+  Future<void> updateCustomer(Map<String, String> customer) async {
+    final db = await database;
+    await db.update(
+      'customers',
+      customer,
+      where: 'id = ?',
+      whereArgs: [customer['id']],
+    );
+  }
+
+  Future<void> deleteCustomer(String id) async {
+    final db = await database;
+    await db.delete(
+      'customers',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<List<Map<String, String>>> getAllCustomers() async {
+    final db = await database;
+    final result = await db.query('customers');
+    return result.map((row) {
+      return {
+        'id': row['id'].toString(),
+        'firstName': row['firstName'] as String,
+        'lastName': row['lastName'] as String,
+        'address': row['address'] as String,
+        'birthday': row['birthday'] as String,
+      };
+    }).toList();
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../forms/add_dealership_page.dart'; // Form for adding/editing dealerships
-import '../services/database_service.dart'; // Service for database management
+import '../services/DatabaseService.dart'; // Service for database management
 import '../widgets/custom_snackbar.dart'; // Widget for showing Snackbar notifications
 
 class DealershipListPage extends StatefulWidget {
